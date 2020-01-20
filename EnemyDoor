@@ -1,0 +1,28 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class NMEdoor : MonoBehaviour
+{
+    MeshCollider meshColl;
+    void Start()
+    {
+        meshColl = GetComponent<MeshCollider>();
+        meshColl.enabled = false;
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+            meshColl.enabled = true;
+        else
+            if(!other.CompareTag("Player"))
+                meshColl.enabled = false;
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+            meshColl.enabled = false;
+    }
+}
