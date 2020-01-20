@@ -1,0 +1,39 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class MidTurn : MonoBehaviour
+{
+    NME nme;
+    float delay;
+    bool change = true;
+
+    void Update()
+    {
+        if (delay > 0)
+            Timer();
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("NME") && change)
+        {
+            nme = other.gameObject.GetComponent<NME>();
+            nme.ChangeDirection();
+            change = false;
+            ResetChange();
+        }
+    }
+    void Timer()
+    {
+        delay -= Time.deltaTime;
+        if (delay < 0)
+            change = true;
+    }
+
+    void ResetChange()
+    { 
+        delay = 2f;
+        Timer();
+    }
+}
