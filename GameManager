@@ -1,0 +1,104 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+
+public class GameManager : MonoBehaviour
+{
+    public int score;
+    int candyNb;
+    public int gotCandies = 0;
+    public static GameManager instance;
+    public Avatar avatarPrefab;
+    public Cherry cherry;
+    [HideInInspector]
+    public Avatar avatar;
+    public GameObject pausePanel;
+    public GameObject winPanel;
+    GameObject spawnPoint;
+    GameObject[] allNMes;
+    GameObject[] allCandies;
+
+    float delay = 5f;
+
+    void Start()
+    {
+        Time.timeScale = 1;
+        instance = this;
+        spawnPoint = GameObject.FindGameObjectsWithTag("Respawn")[0];
+        allCandies = GameObject.FindGameObjectsWithTag("Candy");
+        foreach(object candyy in allCandies)
+        {
+            candyNb++;
+        }
+        
+        allNMes = GameObject.FindGameObjectsWithTag("NME");
+        SpawnAvatar();
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            PauseEvents();
+        }
+        if (gotCandies == candyNb)
+            WinPanel();
+
+        if (delay > 0)
+            Timer();
+    }
+
+    void PauseEvents()
+    {
+        if (pausePanel.activeInHierarchy)
+        {
+            pausePanel.SetActive(false);
+            Time.timeScale = 1;
+        }
+        else
+        {
+            pausePanel.SetActive(true);
+            Time.timeScale = 0;
+        }
+    }
+
+    void WinPanel()
+    {
+            Time.timeScale = 0;
+            winPanel.SetActive(true);
+    }
+
+    void SpawnAvatar()
+    {
+        avatar = Instantiate(avatarPrefab, spawnPoint.transform.position,Quaternion.identity);
+    }
+
+    public void RespawnAvatarAfterDeath()
+    {
+        foreach (GameObject nme in allNMes)
+        {
+            nme.gameObject.transform.GetComponent<NME>().RespawnAfterDeath();
+        }
+        SpawnAvatar();
+    }
+
+    void Timer()
+    {
+        delay -= Time.deltaTime;
+        if (delay < 0)
+            SpawnCherry();
+    }
+
+    int Probability(int min,int max)
+    {
+        int newN = Random.Range(min, max);
+        return newN;
+    }
+
+    void SpawnCherry()
+    {
+        Instantiate(cherry, allCandies[Probability(0, allCandies.Length - 1)].gameObject.transform.position, Quaternion.identity);
+        delay = Probability(5, 15);
+    }
+}
