@@ -1,0 +1,68 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Avatar : MonoBehaviour
+{
+    float speed = 0.9f;
+    public float delayHero = 2;
+    Transform tr;
+    Vector2 direction;
+    public bool isHero;
+    float sSpeed;
+
+    RaycastHit hit;
+    float maxRayDistance = 0.17f;
+
+    void Start()
+    {
+        tr = this.transform;
+        sSpeed = speed;
+    }
+
+    void Update()
+    {
+        Physics.Raycast(transform.position, direction, out hit, maxRayDistance);
+
+        if (hit.collider)
+            speed = 0;
+        else
+            speed = sSpeed;
+
+            Controls();
+
+        tr.Translate(direction * speed * Time.deltaTime);
+
+        if (isHero)
+        {
+            ResetHero();
+        }
+    }
+
+    void Controls()
+    {
+        if (Input.GetKey("down"))
+            direction = Vector2.down;
+        else if (Input.GetKey("up"))
+            direction = Vector2.up;
+        else if (Input.GetKey("right"))
+            direction = Vector2.right;
+        else if (Input.GetKey("left"))
+            direction = Vector2.left;
+    }
+
+    void ResetHero()
+    {
+        delayHero -= Time.deltaTime;
+
+        if (delayHero < 0)
+            isHero = false;
+    }
+
+    public void DeathEvents()
+    {
+        GameManager.instance.RespawnAvatarAfterDeath();
+        Destroy(gameObject);
+    }
+}
+
