@@ -1,0 +1,32 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Candy : MonoBehaviour
+{
+    int itsValue;
+    public bool isSpecialCandy;
+
+    void Start()
+    {
+        if (isSpecialCandy)
+            itsValue = 25;
+        else
+            itsValue = 10;
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            GameManager.instance.score += itsValue;
+            GameManager.instance.gotCandies++;
+            if (isSpecialCandy)
+            {
+                GameManager.instance.avatar.isHero = true;
+                GameManager.instance.avatar.delayHero = 2;
+            }
+            gameObject.SetActive(false);
+        }
+    }
+}
