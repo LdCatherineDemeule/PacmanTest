@@ -1,0 +1,51 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Teleport : MonoBehaviour
+{
+    public Transform teleportTwinPoint;
+    public Transform teleportTwin;
+    float delay;
+
+    void Update()
+    {
+        if (delay > 0)
+            Timer();
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+            TeleportAvatar();
+        if (other.CompareTag("NME"))
+            TeleportNME(other.transform);
+    }
+
+    void ActivateTwin()
+    {
+        teleportTwin.gameObject.SetActive(true);
+    }
+
+    void Timer()
+    {
+        delay -= Time.deltaTime;
+        if (delay < 0)
+            ActivateTwin();
+    }
+
+    void TeleportAvatar()
+    {
+        GameManager.instance.avatar.transform.position = teleportTwinPoint.transform.position;
+        teleportTwin.gameObject.SetActive(false);
+        delay = 0.3f;
+        Timer();
+    }
+    void TeleportNME(Transform tr)
+    {
+        tr.position = teleportTwinPoint.transform.position;
+        teleportTwin.gameObject.SetActive(false);
+        delay = 0.3f;
+        Timer();
+    }
+}
