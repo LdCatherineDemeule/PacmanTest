@@ -1,15 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 
 public class NME : MonoBehaviour
 {
+    public Transform corner;
     Vector3 direction = Vector2.left;
     float maxRayDistance = 0.17f;
     float speed = 0.6f;
     RaycastHit hit;
     SphereCollider coll;
     Vector3 startPosition;
+    Vector2 rightVec;
 
     public float delayStart;
     float delayStKeep;
@@ -19,20 +20,65 @@ public class NME : MonoBehaviour
     float delay;
     public bool allowTurn = true;
 
+    public bool chase;
+    public bool scatter = true;
+    public bool frightened ;
+
+    bool lockState;
+
+    bool[] states = new bool[3];
+
+    float angle;
+
     void Start()
     {
         coll = gameObject.transform.GetComponent<SphereCollider>();
         startPosition = gameObject.transform.position;
         delayStKeep = delayStart;
+        SaveStates();
     }
 
 
     void Update()
     {
+        if (GameManager.instance.avatar.isHero && !lockState)
+        {
+            SaveStates();
+            direction *= -1;
+            frightened = true;
+            scatter = false;
+            chase = false;
+            lockState = true;
+        }
+        else if (!GameManager.instance.avatar.isHero && lockState)
+        {
+            ChangeState();
+            lockState = false;
+        }
+
+        if (scatter)
+        {
+            if (CheckDistance(corner.transform.position, transform.position) < 0.1f)
+            {
+                direction *= -1;
+                chase = true;
+                scatter = false;
+                frightened = false;
+                SaveStates();
+            }
+        }
+
         Physics.Raycast(transform.position, direction, out hit, maxRayDistance);
 
         if (hit.collider)
-            ChangeDirection();
+        {
+            if (frightened)
+                ChangeDirection();
+            else if (chase)
+                ChangeDirectionChase();
+            else if (scatter)
+                ChangeDirectionScatter();
+        }   
 
         transform.Translate(direction * startSpeed * Time.deltaTime);
 
@@ -42,6 +88,7 @@ public class NME : MonoBehaviour
         if(!hasStarted)
         if (delayStart > 0)
             Timer();
+
     }
 
     public void ChangeDirection()
@@ -104,6 +151,398 @@ public class NME : MonoBehaviour
         }
     }
 
+    public void ChangeDirectionChase()
+    {
+        if (allowTurn)
+        {
+            CheckAngle(GameManager.instance.avatar.transform);
+            if (angle > 30)
+            {
+                if (direction == Vector3.up)
+                {
+                    if (CheckDouble(Vector2.right) != Vector2.zero)
+                        direction = Vector2.right;
+                    else
+                    {
+                        if (CheckDouble(Vector2.up) != Vector2.zero)
+                            direction = Vector2.up;
+                        else
+                            direction = Vector2.left;
+                    }
+                }
+                else
+                if (direction == Vector3.right)
+                {
+                    if (CheckDouble(Vector2.down) != Vector2.zero)
+                        direction = Vector2.down;
+                    else
+                    {
+                        if (CheckDouble(Vector2.right) != Vector2.zero)
+                            direction = Vector2.right;
+                        else
+                            direction = Vector2.up;
+                    }
+                }
+                else
+                if (direction == Vector3.left)
+                {
+                    if (CheckDouble(Vector2.up) != Vector2.zero)
+                        direction = Vector2.up;
+                    else
+                    {
+                        if (CheckDouble(Vector2.left) != Vector2.zero)
+                            direction = Vector2.left;
+                        else
+                            direction = Vector2.down;
+                    }
+                }
+                else
+                {
+                    if (CheckDouble(Vector2.left) != Vector2.zero)
+                        direction = Vector2.left;
+                    else
+                    {
+                        if (CheckDouble(Vector2.down) != Vector2.zero)
+                            direction = Vector2.down;
+                        else
+                            direction = Vector2.right;
+                    }
+
+                }
+                allowTurn = false;
+                ResetChange();
+            }
+            else
+                if (angle < -30)
+                {
+                    if (direction == Vector3.up)
+                    {
+                        if (CheckDouble(Vector2.left) != Vector2.zero)
+                            direction = Vector2.left;
+                        else
+                        {
+                            if (CheckDouble(Vector2.up) != Vector2.zero)
+                                direction = Vector2.up;
+                            else
+                                direction = Vector2.right;
+                        }
+                    }
+                else
+                if (direction == Vector3.right)
+                {
+                    if (CheckDouble(Vector2.up) != Vector2.zero)
+                        direction = Vector2.up;
+                    else
+                    {
+                        if (CheckDouble(Vector2.right) != Vector2.zero)
+                            direction = Vector2.right;
+                        else
+                            direction = Vector2.down;
+                    }
+                }
+                else
+                if (direction == Vector3.left)
+                {
+                    if (CheckDouble(Vector2.down) != Vector2.zero)
+                        direction = Vector2.down;
+                    else
+                    {
+                        if (CheckDouble(Vector2.left) != Vector2.zero)
+                            direction = Vector2.left;
+                        else
+                            direction = Vector2.up;
+                    }
+                }
+                else
+                {
+                    if (CheckDouble(Vector2.right) != Vector2.zero)
+                        direction = Vector2.right;
+                    else
+                    {
+                        if (CheckDouble(Vector2.down) != Vector2.zero)
+                            direction = Vector2.down;
+                        else
+                            direction = Vector2.left;
+                    }
+
+                }
+                allowTurn = false;
+                ResetChange();
+            }
+            else
+            {
+                if (direction == Vector3.up)
+                {
+                    if (CheckDouble(Vector2.up) != Vector2.zero)
+                        direction = Vector2.up;
+                    else
+                    {
+                        if (CheckDouble(Vector2.right) != Vector2.zero)
+                            direction = Vector2.right;
+                        else
+                            direction = Vector2.left;
+                    }
+                }
+                else
+                if (direction == Vector3.right)
+                {
+                    if (CheckDouble(Vector2.right) != Vector2.zero)
+                        direction = Vector2.right;
+                    else
+                    {
+                        if (CheckDouble(Vector2.down) != Vector2.zero)
+                            direction = Vector2.down;
+                        else
+                            direction = Vector2.up;
+                    }
+                }
+                else
+                if (direction == Vector3.left)
+                {
+                    if (CheckDouble(Vector2.left) != Vector2.zero)
+                        direction = Vector2.left;
+                    else
+                    {
+                        if (CheckDouble(Vector2.up) != Vector2.zero)
+                            direction = Vector2.up;
+                        else
+                            direction = Vector2.down;
+                    }
+                }
+                else
+                {
+                    if (CheckDouble(Vector2.right) != Vector2.zero)
+                        direction = Vector2.right;
+                    else
+                    {
+                        if (CheckDouble(Vector2.down) != Vector2.zero)
+                            direction = Vector2.down;
+                        else
+                            direction = Vector2.left;
+                    }
+
+                }
+                allowTurn = false;
+                ResetChange();
+            }
+        }
+    }
+
+    public void ChangeDirectionScatter()
+    {
+        if (allowTurn)
+        {
+                CheckAngle(corner);
+                if (angle > 30)
+                {
+                    if (direction == Vector3.up)
+                    {
+                        if (CheckDouble(Vector2.right) != Vector2.zero)
+                            direction = Vector2.right;
+                        else
+                        {
+                            if (CheckDouble(Vector2.up) != Vector2.zero)
+                                direction = Vector2.up;
+                            else
+                                direction = Vector2.left;
+                        }
+                    }
+                    else
+                    if (direction == Vector3.right)
+                    {
+                        if (CheckDouble(Vector2.down) != Vector2.zero)
+                            direction = Vector2.down;
+                        else
+                        {
+                            if (CheckDouble(Vector2.right) != Vector2.zero)
+                                direction = Vector2.right;
+                            else
+                                direction = Vector2.up;
+                        }
+                    }
+                    else
+                    if (direction == Vector3.left)
+                    {
+                        if (CheckDouble(Vector2.up) != Vector2.zero)
+                            direction = Vector2.up;
+                        else
+                        {
+                            if (CheckDouble(Vector2.left) != Vector2.zero)
+                                direction = Vector2.left;
+                            else
+                                direction = Vector2.down;
+                        }
+                    }
+                    else
+                    {
+                        if (CheckDouble(Vector2.left) != Vector2.zero)
+                            direction = Vector2.left;
+                        else
+                        {
+                            if (CheckDouble(Vector2.down) != Vector2.zero)
+                                direction = Vector2.down;
+                            else
+                                direction = Vector2.right;
+                        }
+
+                    }
+                    allowTurn = false;
+                    ResetChange();
+                }
+                else
+                    if (angle < -30)
+                {
+                    if (direction == Vector3.up)
+                    {
+                        if (CheckDouble(Vector2.left) != Vector2.zero)
+                            direction = Vector2.left;
+                        else
+                        {
+                            if (CheckDouble(Vector2.up) != Vector2.zero)
+                                direction = Vector2.up;
+                            else
+                                direction = Vector2.right;
+                        }
+                    }
+                    else
+                if (direction == Vector3.right)
+                    {
+                        if (CheckDouble(Vector2.up) != Vector2.zero)
+                            direction = Vector2.up;
+                        else
+                        {
+                            if (CheckDouble(Vector2.right) != Vector2.zero)
+                                direction = Vector2.right;
+                            else
+                                direction = Vector2.down;
+                        }
+                    }
+                    else
+                if (direction == Vector3.left)
+                    {
+                        if (CheckDouble(Vector2.down) != Vector2.zero)
+                            direction = Vector2.down;
+                        else
+                        {
+                            if (CheckDouble(Vector2.left) != Vector2.zero)
+                                direction = Vector2.left;
+                            else
+                                direction = Vector2.up;
+                        }
+                    }
+                    else
+                    {
+                        if (CheckDouble(Vector2.right) != Vector2.zero)
+                            direction = Vector2.right;
+                        else
+                        {
+                            if (CheckDouble(Vector2.down) != Vector2.zero)
+                                direction = Vector2.down;
+                            else
+                                direction = Vector2.left;
+                        }
+
+                    }
+                    allowTurn = false;
+                    ResetChange();
+                }
+                else
+                {
+                    if (direction == Vector3.up)
+                    {
+                        if (CheckDouble(Vector2.up) != Vector2.zero)
+                            direction = Vector2.up;
+                        else
+                        {
+                            if (CheckDouble(Vector2.right) != Vector2.zero)
+                                direction = Vector2.right;
+                            else
+                                direction = Vector2.left;
+                        }
+                    }
+                    else
+                    if (direction == Vector3.right)
+                    {
+                        if (CheckDouble(Vector2.right) != Vector2.zero)
+                            direction = Vector2.right;
+                        else
+                        {
+                            if (CheckDouble(Vector2.down) != Vector2.zero)
+                                direction = Vector2.down;
+                            else
+                                direction = Vector2.up;
+                        }
+                    }
+                    else
+                    if (direction == Vector3.left)
+                    {
+                        if (CheckDouble(Vector2.left) != Vector2.zero)
+                            direction = Vector2.left;
+                        else
+                        {
+                            if (CheckDouble(Vector2.up) != Vector2.zero)
+                                direction = Vector2.up;
+                            else
+                                direction = Vector2.down;
+                        }
+                    }
+                    else
+                    {
+                        if (CheckDouble(Vector2.right) != Vector2.zero)
+                            direction = Vector2.right;
+                        else
+                        {
+                            if (CheckDouble(Vector2.down) != Vector2.zero)
+                                direction = Vector2.down;
+                            else
+                                direction = Vector2.left;
+                        }
+
+                    }
+                    allowTurn = false;
+                    ResetChange();
+                }
+        }
+    }
+
+    float CheckDistance(Vector3 firstPos, Vector3 secPos)
+    {
+        return (Vector3.Distance(firstPos, secPos));
+    }
+
+    void ChangeState()
+    {
+        chase = states[0];
+        scatter = states[1];
+        frightened = states[2];
+    }
+
+    void SaveStates()
+    {
+        states[0] = chase;
+        states[1] = scatter;
+        states[2] = frightened;
+    }
+    void CheckAngle(Transform target)
+    {
+        rightVec = transform.position - target.transform.position;
+        Vector3 targetDir = target.transform.position - transform.position;
+        angle = Vector3.Angle(targetDir, direction);
+        if (!IsRight(direction, rightVec))
+            angle *= -1;
+    }
+
+    Vector2 CheckDouble(Vector2 vec)
+    {
+        RaycastHit doubleCheck;
+        Physics.Raycast(transform.position, vec, out doubleCheck, maxRayDistance);
+        if (doubleCheck.collider == null)
+        {
+            return vec;
+        }
+        return Vector2.zero;
+    }
+
     int Probability(int i)
     {
         int newN = Random.Range(0, i);
@@ -150,6 +589,9 @@ public class NME : MonoBehaviour
         RespawnNME();
         hasStarted = false;
         delayStart = delayStKeep;
+        frightened = false;
+        scatter = true;
+        chase = false;
     }
 
     void OnTriggerEnter(Collider other)
@@ -161,5 +603,10 @@ public class NME : MonoBehaviour
             else
                 GameManager.instance.avatar.DeathEvents();
         }
+    }
+
+    bool IsRight(Vector2 A, Vector2 B)
+    {
+        return -A.x * B.y + A.y * B.x < 0;
     }
 }
