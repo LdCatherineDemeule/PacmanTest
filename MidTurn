@@ -19,7 +19,10 @@ public class MidTurn : MonoBehaviour
         if (other.CompareTag("NME") && change)
         {
             nme = other.gameObject.GetComponent<NME>();
-            nme.ChangeDirection();
+            if (nme.frightened)
+                nme.ChangeDirection();
+            else if (nme.chase)
+                nme.ChangeDirectionChase();
             change = false;
             ResetChange();
         }
