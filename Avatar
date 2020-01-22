@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Avatar : MonoBehaviour
 {
     float speed = 0.9f;
-    public float delayHero = 2;
+    public float delayHero = 4;
     Transform tr;
     Vector2 direction;
     public bool isHero;
